@@ -1,0 +1,5 @@
+OWT is a project that looks at ways to classify watertypes.
+Classification is done using to sets  of remote sensing variables.
+One set might be AOPs and would include 3 RRS wavebands. The other 
+might be IOPs, e.g. those calculated using QAA (v5), aph,adg,bbp
+ 
