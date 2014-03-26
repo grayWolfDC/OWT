@@ -66,14 +66,8 @@ def owt_kmeans():
     centChng = 1 # difference between the greatest of the distances between the previous
             #      centroid positions and the corresponding updated positions.
     # get data range in all dimensions:
-
-    minX = min(myDat[:,0])
-    minY = min(myDat[:,1])
-    minZ = min(myDat[:,2])
-
-    maxX = max(myDat[:,0])
-    maxY = max(myDat[:,1])
-    maxZ = max(myDat[:,2])
+    [minX,minY,minZ] = myDat.min(axis=0)
+    [maxX,maxY,maxZ] = myDat.min(axis=0)
 
     # initialize cluster centroids previous positions
     cXold = np.random.uniform(low=minX,high=maxX,size=(numClusters,1))
@@ -89,9 +83,11 @@ def owt_kmeans():
     oldCentXYZ = np.hstack((cXold,cYold,cZold))                       
     newCentXYZ = np.hstack((cXnew,cYnew,cZnew))
     # initialize clusterFlag
-    clusterFlag = np.zeros((dataShape[0],numClusters))
+    clusterFlag = np.zeros(dataShape[0])
     
-    
+    # plotinitial conditions here
+    # plot all points (they will be plotted in black
+    # plot 
     while centChng > tol:
         # Two steps
         # A - based on initial cluster centroid positions, initialize cluster membership
