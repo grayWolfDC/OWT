@@ -4,28 +4,31 @@ import numpy as np
 #def randrange(n,vmin,vmax):
  #   return(vmax - vmin) * np.random.rand(n) + vmin
  
-
-def plotter(myDat,figNum,feat,**kwargs ):
-    from mpl_toolkits.mplot3d import Axes3D
-    import matplotlib.pyplot as plt
-    fig = plt.figure(figNum)
-    ax = fig.add_suplot(111,projection='3d')
-    # needs some means of converting flag to point color in hex
-    # or maybe require the user to set/enter it manually
-    if "centroids" in kwargs:
-        centroids = kwargs["centroids"]
-    if "cFlag" in kwargs:
-        # determine c
-        pass
-    else:
-        c='#000000'
-    m = 'o'
-    ax.scatter(myDat[:,0],myDat[:,1],myDat[:,2],c=c,marker=m)
-    ax.set_xlabel(feat[0])
-    ax.set_ylabel(feat[1])
-    ax.set_zlabel(feat[2])
-    plt.draw()
-    pass
+#def plotter(myDat,figNum,feat,**kwargs ):
+#    from mpl_toolkits.mplot3d import Axes3D
+#    import matplotlib.pyplot as plt
+    #fig = plt.figure(figNum)
+    #ax = fig.add_suplot(111,projection='3d')
+    ## needs some means of converting flag to point color in hex
+    ## or maybe require the user to set/enter it manually
+    #availColors= ['#000000','#ff0000','#00ff00','#0000ff']
+    #if "centroids" in kwargs:
+    #    centroids = kwargs["centroids"]
+    #    cshape=centroids.shape
+    #    #get from cshape number of centroids
+    #if "cFlag" in kwargs:
+    #    cFlag = kwargs["cFlag"]
+    #    c = availColors(cFlag)
+    #    pass
+    #else:
+    #    c='#000000'
+    #m = 'o'
+    #ax.scatter(myDat[:,0],myDat[:,1],myDat[:,2],c=c,marker=m)
+    #ax.set_xlabel(feat[0])
+    #ax.set_ylabel(feat[1])
+    #ax.set_zlabel(feat[2])
+    #plt.draw()
+    #pass
     
 def findDist(array1,array2):
     # Given array1, an array of size m1xn
@@ -44,25 +47,23 @@ def updateFlag(distArray):
     newFlag = np.argmin(distArray,axis=1)
     return newFlag
     
-def main():
+#def main():
+def owt_kmeans():
     ts = np.loadtxt('training.txt')
     #for c,m,zl,zh in [('r','o', -50, -25),('b','^',-30,-5)]:
     #    xs = randrange(n,23,32)
     #    ys = randrange(n,0,100)
     #    zs = randrange(n,zl,zh)
     #    ax.scatter(xs,ys,zs,c=c,marker=m)
-    myDat = ts[:,2:5]
+    myDat = ts[:,2:5]#features = ['443nm','510nm','555nm']
     dataShape = myDat.shape
-    #features = ['443nm','510nm','555nm']
-    
     # begin clustering
-    
     # -> will need something to determine the right numbers of clusters to fit
-
+    
     #intialize some useful variables
     numClusters = 3 # number of clusters to shoot for
-    #tol = 0.01 # change limit below which the program stops
-    #centChng = 1 # difference between the greatest of the distances between the previous
+    tol = 0.001 # change limit below which the program stops
+    centChng = 1 # difference between the greatest of the distances between the previous
             #      centroid positions and the corresponding updated positions.
     # get data range in all dimensions:
 
@@ -89,32 +90,38 @@ def main():
     newCentXYZ = np.hstack((cXnew,cYnew,cZnew))
     # initialize clusterFlag
     clusterFlag = np.zeros((dataShape[0],numClusters))
-
-    #while centChng > tol:
+    
+    
+    while centChng > tol:
         # Two steps
         # A - based on initial cluster centroid positions, initialize cluster membership
         #     for all points, and color them accordingly.
         #     To do that: 
         #       1 - Calculate distance of each point to all old centroids
-    distArray = findDist(myDat,oldCentXYZ)
+        distArray = findDist(myDat,oldCentXYZ)
 	#       2 - Select the shortest distance
         #       3 - Flag the point for the corresponding cluster
-    clusterFlag = updateFlag(distArray)    
+        clusterFlag = updateFlag(distArray)    
         # B - calculate new centroid position based on cluster membership
         # To do that:
         #    1 - cycle through all flags
-    minFlag = min(clusterFlag)
-    maxFlag = max(clusterFlag)
-    flag = minFlag
-    while flag <= maxFlag:
-       
-        #    2 - for each flag:
-        #        identify member points
-        pts = myDat[np.nonzero(clusterFlag==flag),:]
-        #   3 - update the centroid position 
-        #        column-wise mean of pts yields the new position of that centroid                
-        # end of while (flag) loop
-    # end of while (tol) loop
+        flag = min(clusterFlag)
         
-if __name__ == "__main__":
-    main()
+        while flag < numClusters:
+       
+            #    2 - for each flag:
+            #        identify member points
+            pts = myDat[np.nonzero(clusterFlag==flag),:]
+            #   3 - update the centroid position 
+            # column-wise mean of pts yields the new position of that centroid 
+            newCentXYZ[flag,:] = np.mean(pts,axis=1)
+            flag += 1            
+            # end of while (flag) loop
+        # update centChng
+        centChng = max(np.diag(findDist(oldCentXYZ,newCentXYZ)))
+        oldCentXYZ = newCentXYZ
+        # update plot
+    # end of while (tol) loop
+    return oldCentXYZ   
+#if __name__ == "__main__":
+#    cenXYZ = main()
